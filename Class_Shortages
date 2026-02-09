@@ -1,0 +1,26 @@
+public class Shortages
+{
+    private Dictionary<string, int> shortages = new Dictionary<string, int>();
+
+    public void AddShortage(string productName, int quantity)
+    {
+        if (shortages.ContainsKey(productName))
+        {
+            shortages[productName] += quantity;
+        }
+        else
+        {
+            shortages.Add(productName, quantity);
+        }
+    }
+
+    public void DisplayShortages()
+    {
+        Console.WriteLine("Faltantes:");
+        foreach (var item in shortages)
+        {
+            Console.WriteLine($"{item.Key}: {item.Value} unidades pendientes");
+        }
+    }
+}
+// Clase para manejar Faltantes

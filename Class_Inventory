@@ -1,0 +1,36 @@
+public class Inventory
+{
+    private Dictionary<string, int> products = new Dictionary<string, int>();
+
+    public void AddProduct(string productName, int quantity)
+    {
+        if (products.ContainsKey(productName))
+        {
+            products[productName] += quantity;
+        }
+        else
+        {
+            products.Add(productName, quantity);
+        }
+    }
+
+    public bool SellProduct(string productName, int quantity)
+    {
+        if (products.ContainsKey(productName) && products[productName] >= quantity)
+        {
+            products[productName] -= quantity;
+            return true;
+        }
+        return false;
+    }
+
+    public void DisplayInventory()
+    {
+        Console.WriteLine("Inventario actual:");
+        foreach (var item in products)
+        {
+            Console.WriteLine($"{item.Key}: {item.Value} unidades");
+        }
+    }
+}
+// Clase para manejar el Inventario

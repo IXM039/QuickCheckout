@@ -1,0 +1,45 @@
+public class Sales
+{
+    private List<decimal> totalSales = new List<decimal>();
+    private Dictionary<string, List<decimal>> salesByCashier = new Dictionary<string, List<decimal>>();
+
+    public void RegisterSale(decimal amount, string cashier)
+    {
+        totalSales.Add(amount);
+        if (!salesByCashier.ContainsKey(cashier))
+        {
+            salesByCashier[cashier] = new List<decimal>();
+        }
+        salesByCashier[cashier].Add(amount);
+    }
+
+    public decimal GetTotalGains()
+    {
+        decimal total = 0;
+        foreach (var sale in totalSales)
+        {
+            total += sale;
+        }
+        return total;
+    }
+
+    public void DisplayGains()
+    {
+        Console.WriteLine($"Ganancias totales: {GetTotalGains()}");
+    }
+
+    public void DisplaySalesByCashier()
+    {
+        Console.WriteLine("Ventas por cajero:");
+        foreach (var entry in salesByCashier)
+        {
+            decimal total = 0;
+            foreach (var sale in entry.Value)
+            {
+                total += sale;
+            }
+            Console.WriteLine($"{entry.Key}: {total}");
+        }
+    }
+}
+//Clase para manejar las Ventas y Ganancias

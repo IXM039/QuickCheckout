@@ -1,0 +1,298 @@
+class Program
+{
+    static void Main(string[] args)
+    {
+        UserManager userManager = new UserManager();
+        Inventory inventory = new Inventory();
+        Shortages shortages = new Shortages();
+        Sales sales = new Sales();
+
+        // Usuarios de ejemplo
+        userManager.AddUser("admin", "admin123", "Admin");
+        userManager.AddUser("cajero1", "pass123", "Cajero");
+        userManager.AddUser("cajero2", "pass456", "Cajero");
+
+        inventory.AddProduct("Azucar 1kg", 20);
+        inventory.AddProduct("Harina 1kg", 15);
+        inventory.AddProduct("Arroz 5kg", 8);
+
+        bool running = true;
+        User currentUser = null;
+
+        while (running)
+        {
+            if (currentUser == null)
+            {
+                while (true)
+                {
+                    Helper.ClearScreen();
+                    Console.WriteLine("=== INICIO DE SESIÓN ===");
+                    Console.Write("Usuario: ");
+                    string username = Console.ReadLine()?.Trim();
+
+                    // Validación de usuario vacío
+                    if (string.IsNullOrWhiteSpace(username))
+                    {
+                        Console.WriteLine("¡Error! El usuario no puede estar vacío.");
+                        Console.WriteLine("Presione cualquier tecla para continuar...");
+                        Console.ReadKey();
+                        continue;
+                    }
+
+                    // Validación de caracteres inválidos
+                    if (!Helper.IsValidUsername(username))
+                    {
+                        Console.WriteLine("¡Error! Solo se permiten letras, números, punto (.) y guion bajo (_).");
+                        Console.WriteLine("Presione cualquier tecla para intentar de nuevo...");
+                        Console.ReadKey();
+                        continue;
+                    }
+
+                    Console.Write("Contraseña: ");
+                    string password = Helper.ReadPassword();
+
+                    if (string.IsNullOrWhiteSpace(password))
+                    {
+                        Console.WriteLine("¡Error! La contraseña no puede estar vacía.");
+                        Console.WriteLine("Presione cualquier tecla...");
+                        Console.ReadKey();
+                        continue;
+                    }
+
+                    Helper.ShowLoading("Iniciando sesión");
+
+                    try
+                    {
+                        currentUser = userManager.Login(username, password);
+                        if (currentUser == null)
+                        {
+                            Console.WriteLine("Credenciales incorrectas.");
+                            Console.WriteLine("Presione cualquier tecla para intentar nuevamente...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
+                        Console.WriteLine($"\n¡Bienvenido {currentUser.Username}! ({currentUser.Role})");
+                        Thread.Sleep(1200);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error inesperado: {ex.Message}");
+                        Console.ReadKey();
+                    }
+                }
+            }
+
+            // Menú principal
+            Helper.ClearScreen();
+            Console.WriteLine($"=== SISTEMA - {currentUser.Username} ({currentUser.Role}) ===");
+            Console.WriteLine("1. Caja (Registrar ventas)");
+            Console.WriteLine("2. Registro de ganancias");
+            Console.WriteLine("3. Inventario");
+            Console.WriteLine("4. Faltantes");
+            Console.WriteLine("5. Cambiar de usuario");
+            if (currentUser.Role == "Admin")
+            {
+                Console.WriteLine("6. Menú Administrador");
+            }
+            Console.WriteLine("0. Salir del sistema");
+            Console.Write("\nOpción: ");
+
+            string option;
+            try
+            {
+                option = Console.ReadLine()?.Trim();
+            }
+            catch
+            {
+                option = "";
+            }
+
+            switch (option)
+            {
+                case "1": // Caja
+                    try
+                    {
+                        Helper.ClearScreen();
+                        Console.WriteLine("=== REGISTRAR VENTA ===");
+                        Console.Write("Producto: ");
+                        string product = Console.ReadLine()?.Trim();
+
+                        if (string.IsNullOrWhiteSpace(product))
+                        {
+                            Console.WriteLine("Producto no puede estar vacío.");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        Console.Write("Cantidad: ");
+                        if (!int.TryParse(Console.ReadLine(), out int qty) || qty <= 0)
+                        {
+                            Console.WriteLine("Cantidad inválida (debe ser número positivo).");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        Console.Write("Precio por unidad: ");
+                        if (!decimal.TryParse(Console.ReadLine(), out decimal price) || price <= 0)
+                        {
+                            Console.WriteLine("Precio inválido.");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        Helper.ShowLoading("Procesando venta");
+
+                        if (inventory.SellProduct(product, qty))
+                        {
+                            decimal total = qty * price;
+                            sales.RegisterSale(total, currentUser.Username);
+                            shortages.AddShortage(product, qty);
+                            Console.WriteLine($"\nVenta registrada exitosamente: ${total:N2}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No hay suficiente stock del producto.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error al registrar venta: {ex.Message}");
+                    }
+                    Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                    Console.ReadKey();
+                    break;
+
+                case "2":
+                    Helper.ClearScreen();
+                    Console.WriteLine("=== REGISTRO DE GANANCIAS ===");
+                    Helper.ShowLoading("Cargando");
+                    sales.DisplayGains();
+                    Console.ReadKey();
+                    break;
+
+                case "3":
+                    Helper.ClearScreen();
+                    Console.WriteLine("=== INVENTARIO ===");
+                    Helper.ShowLoading("Cargando inventario");
+                    inventory.DisplayInventory();
+                    Console.ReadKey();
+                    break;
+
+                case "4":
+                    Helper.ClearScreen();
+                    Console.WriteLine("=== FALTANTES ===");
+                    Helper.ShowLoading("Cargando faltantes");
+                    shortages.DisplayShortages();
+                    Console.ReadKey();
+                    break;
+
+                case "5": // Cambiar usuario
+                    Helper.ClearScreen();
+                    Console.Write("¿Confirmar cambio de usuario? (s/n): ");
+                    string confirm = Console.ReadLine()?.ToLower();
+                    if (confirm == "s" || confirm == "si")
+                    {
+                        Helper.ShowLoading("Cerrando sesión");
+                        currentUser = null;
+                    }
+                    break;
+
+                case "6":
+                    if (currentUser.Role == "Admin")
+                    {
+                        AdminMenu(userManager, inventory, shortages, sales, ref currentUser);
+                    }
+                    break;
+
+                case "0":
+                    Helper.ClearScreen();
+                    Console.Write("¿Realmente desea salir? (s/n): ");
+                    if (Console.ReadLine()?.ToLower() == "s")
+                    {
+                        Helper.ShowLoading("Cerrando sistema");
+                        running = false;
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Opción no válida.");
+                    Console.ReadKey();
+                    break;
+            }
+        }
+    }
+
+    static void AdminMenu(UserManager userManager, Inventory inventory, Shortages shortages, Sales sales, ref User currentUser)
+    {
+        bool adminRunning = true;
+        while (adminRunning)
+        {
+            Helper.ClearScreen();
+            Console.WriteLine("=== MENÚ ADMINISTRADOR ===");
+            Console.WriteLine("1. Reiniciar el sistema");
+            Console.WriteLine("2. Eliminar usuario");
+            Console.WriteLine("3. Ver ventas por cajero");
+            Console.WriteLine("0. Volver al menú principal");
+            Console.Write("\nOpción: ");
+
+            string choice = Console.ReadLine()?.Trim();
+
+            switch (choice)
+            {
+                case "1":
+                    Helper.ClearScreen();
+                    Console.Write("¡ATENCIÓN! ¿Realmente desea reiniciar TODO el sistema? (s/n): ");
+                    if (Console.ReadLine()?.ToLower() == "s")
+                    {
+                        Helper.ShowLoading("Reiniciando sistema");
+                        try
+                        {
+                            userManager.ResetSystem(inventory, shortages, sales);
+                            currentUser = null;
+                            adminRunning = false;
+                            Console.WriteLine("Sistema reiniciado completamente.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error al reiniciar: {ex.Message}");
+                        }
+                    }
+                    Console.ReadKey();
+                    break;
+
+                case "2":
+                    Helper.ClearScreen();
+                    userManager.DisplayUsers();
+                    Console.Write("\nUsuario a eliminar: ");
+                    string userToDelete = Console.ReadLine()?.Trim();
+                    if (!string.IsNullOrWhiteSpace(userToDelete))
+                    {
+                        Helper.ShowLoading("Eliminando usuario");
+                        userManager.DeleteUser(userToDelete);
+                        Console.WriteLine("Usuario eliminado (si existía).");
+                    }
+                    Console.ReadKey();
+                    break;
+
+                case "3":
+                    Helper.ClearScreen();
+                    Console.WriteLine("=== VENTAS POR CAJERO ===");
+                    Helper.ShowLoading("Cargando reporte");
+                    sales.DisplaySalesByCashier();
+                    Console.ReadKey();
+                    break;
+
+                case "0":
+                    adminRunning = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Opción inválida.");
+                    Console.ReadKey();
+                    break;
+            }
+        }
+    }
+}

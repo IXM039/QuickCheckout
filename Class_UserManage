@@ -1,0 +1,44 @@
+public class UserManager
+{
+    private List<User> users = new List<User>();
+
+    public void AddUser(string username, string password, string role)
+    {
+        users.Add(new User(username, password, role));
+    }
+
+    public User Login(string username, string password)
+    {
+        foreach (var user in users)
+        {
+            if (user.Username == username && user.Password == password)
+            {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public void DeleteUser(string username)
+    {
+        users.RemoveAll(u => u.Username == username);
+    }
+
+    public void DisplayUsers()
+    {
+        Console.WriteLine("Usuarios registrados:");
+        foreach (var user in users)
+        {
+            Console.WriteLine($"{user.Username} - Rol: {user.Role}");
+        }
+    }
+
+    public void ResetSystem(Inventory inventory, Shortages shortages, Sales sales)
+    {
+        users.Clear();
+        inventory = new Inventory(); // Reiniciar inventario
+        shortages = new Shortages(); // Reiniciar faltantes
+        sales = new Sales(); // Reiniciar ventas
+        Console.WriteLine("Sistema reiniciado.");
+    }
+}
