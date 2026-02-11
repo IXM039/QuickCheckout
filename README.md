@@ -27,7 +27,7 @@ A simple console-based point-of-sale (POS) and inventory management system devel
 
 - .NET SDK 6.0 or higher (recommended: .NET 8)
 - Operating System: Windows, macOS, or Linux
-- Terminal / Console (cmd, PowerShell, Terminal, etc.)
+- Terminal / Console: cmd, PowerShell, Terminal, etc. (Temporarily)
 
 ## How to Install and Run
 
