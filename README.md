@@ -34,4 +34,4 @@ A simple console-based point-of-sale (POS) and inventory management system devel
 1. Clone or download the repository:
 
 ```bash
-https://github.com/IXM039/QuickCheckout
+github.com/IXM039/QuickCheckout
