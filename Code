@@ -66,8 +66,7 @@ class Program
                         currentUser = userManager.Login(username, password);
                         if (currentUser == null)
                         {
-                            Console.WriteLine("Credenciales incorrectas.");
-                            Console.WriteLine("Presione cualquier tecla para intentar nuevamente...");
+                            Console.WriteLine("Las credenciales que ha ingresado son incorrectas, presione cualquier tecla para intentarlo nuevamente...");
                             Console.ReadKey();
                             continue;
                         }
@@ -87,16 +86,16 @@ class Program
             // Menú principal
             Helper.ClearScreen();
             Console.WriteLine($"=== SISTEMA - {currentUser.Username} ({currentUser.Role}) ===");
-            Console.WriteLine("1. Caja (Registrar ventas)");
-            Console.WriteLine("2. Registro de ganancias");
-            Console.WriteLine("3. Inventario");
-            Console.WriteLine("4. Faltantes");
-            Console.WriteLine("5. Cambiar de usuario");
+            Console.WriteLine("|1| Caja (Registrar ventas)");
+            Console.WriteLine("|2| Registro de ganancias");
+            Console.WriteLine("|3| Inventario");
+            Console.WriteLine("|4| Faltantes");
+            Console.WriteLine("|5| Cambiar de usuario");
             if (currentUser.Role == "Admin")
             {
-                Console.WriteLine("6. Menú Administrador");
+                Console.WriteLine("|6| Menú Administrador");
             }
-            Console.WriteLine("0. Salir del sistema");
+            Console.WriteLine("|0| Salir del sistema");
             Console.Write("\nOpción: ");
 
             string option;
